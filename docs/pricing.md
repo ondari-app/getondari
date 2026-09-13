@@ -1,6 +1,6 @@
 # Pricing, versions, and explainability
 
-The pricing system is the part of Ambral that must never be wrong. Three
+The pricing system is the part of Ondari that must never be wrong. Three
 rules govern it:
 
 1. **Costs are deterministic.** Normalized usage × a pricing version → an
@@ -46,11 +46,11 @@ Every cost resolves to a one-line proof:
 > `OpenAI → gpt-4o → version v2026-08-14 (source verified 2026-08-15): 1.2M input × $2.50 + 42K output × $10.00 = $3.42`
 
 That line is *part of the product*, not an implementation detail. If
-Ambral says $3.42, one click shows why.
+Ondari says $3.42, one click shows why.
 
 ## How prices get in (the hard part)
 
-Provider prices change constantly and rarely expose a clean API. Ambral
+Provider prices change constantly and rarely expose a clean API. Ondari
 uses a tiered model:
 
 - **Tier 1 — official source.** Provider pricing pages/APIs.

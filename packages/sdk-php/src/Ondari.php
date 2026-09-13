@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Ambral;
+namespace Ondari;
 
 /**
- * The Ambral PHP client. Send usage events and read back itemized,
+ * The Ondari PHP client. Send usage events and read back itemized,
  * explainable costs. Cost is server-computed — you never send a price.
  */
-final class Ambral
+final class Ondari
 {
-    private const DEFAULT_BASE_URL = 'https://ambral.dev';
+    private const DEFAULT_BASE_URL = 'https://ondari.dev';
 
     public function __construct(
         private readonly string $apiKey,
@@ -19,7 +19,7 @@ final class Ambral
         private readonly ?HttpClient $http = null,
     ) {
         if ($apiKey === '') {
-            throw new AmbralException('apiKey is required');
+            throw new OndariException('apiKey is required');
         }
     }
 
@@ -34,10 +34,10 @@ final class Ambral
         $results = $this->ingest([$event]);
         $first = $results[0] ?? null;
         if ($first === null) {
-            throw new AmbralException('empty ingest response');
+            throw new OndariException('empty ingest response');
         }
         if (!empty($first['error'])) {
-            throw new AmbralException((string) $first['error']);
+            throw new OndariException((string) $first['error']);
         }
 
         return $first;
@@ -76,7 +76,7 @@ final class Ambral
         for ($attempt = 0; ; $attempt++) {
             try {
                 $response = $client->post($url, $headers, $json);
-            } catch (AmbralException $e) {
+            } catch (OndariException $e) {
                 if ($attempt >= $this->retries) {
                     throw $e;
                 }
@@ -86,7 +86,7 @@ final class Ambral
 
             if ($response->status === 429 || $response->status >= 500) {
                 if ($attempt >= $this->retries) {
-                    throw new AmbralException("HTTP {$response->status} after {$this->retries} retries");
+                    throw new OndariException("HTTP {$response->status} after {$this->retries} retries");
                 }
                 $this->backoff($attempt);
                 continue;
@@ -94,12 +94,12 @@ final class Ambral
 
             $data = json_decode($response->body, true);
             if (!is_array($data)) {
-                throw new AmbralException("invalid JSON in {$response->status} response");
+                throw new OndariException("invalid JSON in {$response->status} response");
             }
 
             if ($response->status >= 400) {
                 $message = $data['error'] ?? "HTTP {$response->status}";
-                throw new AmbralException((string) $message);
+                throw new OndariException((string) $message);
             }
 
             return $data['results'] ?? [];

@@ -11,7 +11,7 @@ The **core** — the deterministic cost engine, event validation, budgets
 math, and usage aggregation — is MIT-licensed and fully usable as a library:
 
 ```ts
-import { computeCost, explainCost } from "@ambral/core";
+import { computeCost, explainCost } from "@ondari/core";
 ```
 
 It has no runtime dependencies. If you want to build your own cost

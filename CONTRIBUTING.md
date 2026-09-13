@@ -1,12 +1,12 @@
 # Contributing
 
-Thanks for caring about Ambral.
+Thanks for caring about Ondari.
 
 ## Getting started
 
 ```bash
-git clone https://github.com/ambral-app/getambral.git
-cd ambral
+git clone https://github.com/ondari-app/getondari.git
+cd ondari
 npm install
 npm test        # core test suite (vitest)
 npm run typecheck

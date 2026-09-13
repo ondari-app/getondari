@@ -1,18 +1,18 @@
-"""The Ambral client."""
+"""The Ondari client."""
 
 import json
 import time
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-from .errors import AmbralError
+from .errors import OndariError
 from .http import HttpResponse, UrllibHttpClient
 from .idempotency import idempotency_key
 
-DEFAULT_BASE_URL = "https://ambral.dev"
+DEFAULT_BASE_URL = "https://ondari.dev"
 
 
-class Ambral:
+class Ondari:
     """Send usage events and read back itemized, explainable costs.
 
     Cost is server-computed — you never send a price.
@@ -27,7 +27,7 @@ class Ambral:
         http: Optional[UrllibHttpClient] = None,
     ):
         if not api_key:
-            raise AmbralError("apiKey is required")
+            raise OndariError("apiKey is required")
         self.api_key = api_key
         self.base_url = base_url.rstrip("/")
         self.retries = retries
@@ -38,9 +38,9 @@ class Ambral:
         results = self._ingest([event])
         first = results[0] if results else None
         if first is None:
-            raise AmbralError("empty ingest response")
+            raise OndariError("empty ingest response")
         if first.get("error"):
-            raise AmbralError(str(first["error"]))
+            raise OndariError(str(first["error"]))
         return first
 
     def track_batch(self, events: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
@@ -62,7 +62,7 @@ class Ambral:
         while True:
             try:
                 response = self.http.post(url, headers, payload)
-            except AmbralError:
+            except OndariError:
                 if attempt >= self.retries:
                     raise
                 attempt += 1
@@ -71,7 +71,7 @@ class Ambral:
 
             if response.status == 429 or response.status >= 500:
                 if attempt >= self.retries:
-                    raise AmbralError(f"HTTP {response.status} after {self.retries} retries")
+                    raise OndariError(f"HTTP {response.status} after {self.retries} retries")
                 attempt += 1
                 self._backoff(attempt)
                 continue
@@ -79,13 +79,13 @@ class Ambral:
             try:
                 data = json.loads(response.body)
             except ValueError:
-                raise AmbralError(f"invalid JSON in {response.status} response") from None
+                raise OndariError(f"invalid JSON in {response.status} response") from None
 
             if not isinstance(data, dict):
-                raise AmbralError(f"invalid JSON in {response.status} response")
+                raise OndariError(f"invalid JSON in {response.status} response")
 
             if response.status >= 400:
-                raise AmbralError(str(data.get("error") or f"HTTP {response.status}"))
+                raise OndariError(str(data.get("error") or f"HTTP {response.status}"))
 
             return data.get("results") or []
 

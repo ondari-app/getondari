@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { Ambral, AmbralError } from "./index";
+import { Ondari, OndariError } from "./index";
 
 function jsonResponse(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
@@ -28,10 +28,10 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-describe("Ambral.track", () => {
+describe("Ondari.track", () => {
   it("posts one event and returns the result", async () => {
     const { calls, respond } = captureFetch();
-    const ab = new Ambral({ apiKey: "k" });
+    const ab = new Ondari({ apiKey: "k" });
     const p = ab.track({ provider: "openai", model: "gpt-4o", inputTokens: 1200000, outputTokens: 42000 });
     respond(jsonResponse({ ingested: 1, results: [{ accepted: true, pricingStatus: "priced", cost: 3.42, explanation: "…" }] }));
 
@@ -40,7 +40,7 @@ describe("Ambral.track", () => {
     expect(result.pricingStatus).toBe("priced");
 
     const { url, init } = calls[0];
-    expect(url).toBe("https://ambral.dev/api/ingest");
+    expect(url).toBe("https://ondari.dev/api/ingest");
     expect(init.method).toBe("POST");
     expect(init.headers).toMatchObject({ Authorization: "Bearer k" });
 
@@ -53,7 +53,7 @@ describe("Ambral.track", () => {
 
   it("uses a caller-supplied idempotencyKey", async () => {
     const { calls, respond } = captureFetch();
-    const ab = new Ambral({ apiKey: "k" });
+    const ab = new Ondari({ apiKey: "k" });
     const p = ab.track({ provider: "x", idempotencyKey: "op-1" });
     respond(jsonResponse({ results: [{ accepted: true }] }));
     await p;
@@ -64,7 +64,7 @@ describe("Ambral.track", () => {
 
   it("accepts a Date timestamp and serializes to ISO", async () => {
     const { calls, respond } = captureFetch();
-    const ab = new Ambral({ apiKey: "k" });
+    const ab = new Ondari({ apiKey: "k" });
     const p = ab.track({ provider: "x", timestamp: new Date("2026-09-09T14:00:00.000Z") });
     respond(jsonResponse({ results: [{ accepted: true }] }));
     await p;
@@ -75,25 +75,25 @@ describe("Ambral.track", () => {
 
   it("honors a custom baseUrl", async () => {
     const { calls, respond } = captureFetch();
-    const ab = new Ambral({ apiKey: "k", baseUrl: "https://selfhost.example/" });
+    const ab = new Ondari({ apiKey: "k", baseUrl: "https://selfhost.example/" });
     const p = ab.track({ provider: "x" });
     respond(jsonResponse({ results: [{ accepted: true }] }));
     await p;
     expect(calls[0].url).toBe("https://selfhost.example/api/ingest");
   });
 
-  it("throws AmbralError on 401 with the server message", async () => {
+  it("throws OndariError on 401 with the server message", async () => {
     const { respond } = captureFetch();
-    const ab = new Ambral({ apiKey: "bad" });
+    const ab = new Ondari({ apiKey: "bad" });
     const p = ab.track({ provider: "x" });
     respond(jsonResponse({ error: "Unauthorized" }, 401));
-    await expect(p).rejects.toThrow(AmbralError);
+    await expect(p).rejects.toThrow(OndariError);
     await expect(p).rejects.toThrow("Unauthorized");
   });
 
   it("retries on 429 then succeeds", async () => {
     const { calls, respond } = captureFetch();
-    const ab = new Ambral({ apiKey: "k", retries: 2 });
+    const ab = new Ondari({ apiKey: "k", retries: 2 });
     const p = ab.track({ provider: "x" });
 
     // first attempt -> 429
@@ -107,10 +107,10 @@ describe("Ambral.track", () => {
   });
 });
 
-describe("Ambral.trackBatch", () => {
+describe("Ondari.trackBatch", () => {
   it("sends all events in one request and preserves order", async () => {
     const { calls, respond } = captureFetch();
-    const ab = new Ambral({ apiKey: "k" });
+    const ab = new Ondari({ apiKey: "k" });
     const p = ab.trackBatch([
       { provider: "openai", model: "gpt-4o" },
       { provider: "anthropic", model: "claude-sonnet-4" },
@@ -131,7 +131,7 @@ describe("Ambral.trackBatch", () => {
 
   it("returns [] for an empty batch without calling the API", async () => {
     const { calls } = captureFetch();
-    const ab = new Ambral({ apiKey: "k" });
+    const ab = new Ondari({ apiKey: "k" });
     await expect(ab.trackBatch([])).resolves.toEqual([]);
     expect(calls).toHaveLength(0);
   });

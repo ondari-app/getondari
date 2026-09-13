@@ -1,20 +1,20 @@
-# @ambral/sdk
+# @ondari/sdk
 
-The Ambral JavaScript/TypeScript SDK. Send usage events and read back
+The Ondari JavaScript/TypeScript SDK. Send usage events and read back
 itemized, explainable costs.
 
 ```bash
-npm install @ambral/sdk
+npm install @ondari/sdk
 ```
 
 ## Usage
 
 ```ts
-import { Ambral } from "@ambral/sdk";
+import { Ondari } from "@ondari/sdk";
 
-const ambral = new Ambral({ apiKey: process.env.AMBRAL_KEY });
+const ondari = new Ondari({ apiKey: process.env.ONDARI_KEY });
 
-const result = await ambral.track({
+const result = await ondari.track({
   provider: "openai",
   model: "gpt-4o",
   inputTokens: 1_200_000,
@@ -33,7 +33,7 @@ console.log(result);
 Batch:
 
 ```ts
-const results = await ambral.trackBatch([
+const results = await ondari.trackBatch([
   { provider: "openai", model: "gpt-4o", inputTokens: 1000, outputTokens: 200 },
   { provider: "anthropic", model: "claude-sonnet-4", inputTokens: 500, outputTokens: 100 },
 ]);
@@ -46,12 +46,12 @@ but for retry-safe code, pass your own so a retried operation returns the
 original result instead of double-counting:
 
 ```ts
-import { idempotencyKey } from "@ambral/sdk";
+import { idempotencyKey } from "@ondari/sdk";
 
 const key = idempotencyKey();
-await ambral.track({ provider: "openai", model: "gpt-4o", idempotencyKey: key });
+await ondari.track({ provider: "openai", model: "gpt-4o", idempotencyKey: key });
 // …retry the same logical operation…
-await ambral.track({ provider: "openai", model: "gpt-4o", idempotencyKey: key });
+await ondari.track({ provider: "openai", model: "gpt-4o", idempotencyKey: key });
 ```
 
 ## Configuration
@@ -59,7 +59,7 @@ await ambral.track({ provider: "openai", model: "gpt-4o", idempotencyKey: key })
 | Option | Default | Notes |
 |---|---|---|
 | `apiKey` | — | Required. Project API key from the dashboard. |
-| `baseUrl` | `https://ambral.dev` | Point at a self-hosted instance. |
+| `baseUrl` | `https://ondari.dev` | Point at a self-hosted instance. |
 | `retries` | `3` | Retries network errors and 429/5xx with backoff. |
 | `timeoutMs` | `10_000` | Per-request timeout. |
 
@@ -67,7 +67,7 @@ await ambral.track({ provider: "openai", model: "gpt-4o", idempotencyKey: key })
 
 - Cost is **server-computed** — you never send a price.
 - Unknown models are accepted (`pricingStatus: "unpriced"`), never rejected.
-- Client errors (401/400) throw `AmbralError` immediately; rate limits and
+- Client errors (401/400) throw `OndariError` immediately; rate limits and
   server errors are retried.
 - No prompts or completions are ever sent — only metadata and token counts.
 

@@ -1,8 +1,8 @@
-export { Ambral } from "./client";
-export { AmbralError } from "./errors";
+export { Ondari } from "./client";
+export { OndariError } from "./errors";
 export { idempotencyKey } from "./idempotency";
 export type {
-  AmbralOptions,
+  OndariOptions,
   PricingStatus,
   TrackResult,
   UsageEvent,

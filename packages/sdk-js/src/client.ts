@@ -1,8 +1,8 @@
-import { AmbralError } from "./errors";
+import { OndariError } from "./errors";
 import { idempotencyKey } from "./idempotency";
-import type { AmbralOptions, TrackResult, UsageEvent } from "./types";
+import type { OndariOptions, TrackResult, UsageEvent } from "./types";
 
-const DEFAULT_BASE_URL = "https://ambral.dev";
+const DEFAULT_BASE_URL = "https://ondari.dev";
 
 interface IngestResponse {
   ingested?: number;
@@ -10,15 +10,15 @@ interface IngestResponse {
   error?: string;
 }
 
-export class Ambral {
+export class Ondari {
   private readonly apiKey: string;
   private readonly baseUrl: string;
   private readonly retries: number;
   private readonly timeoutMs: number;
 
-  constructor(options: AmbralOptions) {
+  constructor(options: OndariOptions) {
     if (!options.apiKey) {
-      throw new AmbralError("apiKey is required");
+      throw new OndariError("apiKey is required");
     }
     this.apiKey = options.apiKey;
     this.baseUrl = (options.baseUrl ?? DEFAULT_BASE_URL).replace(/\/+$/, "");
@@ -31,10 +31,10 @@ export class Ambral {
     const results = await this.ingest([event]);
     const first = results[0];
     if (!first) {
-      throw new AmbralError("empty ingest response");
+      throw new OndariError("empty ingest response");
     }
     if (first.error) {
-      throw new AmbralError(first.error);
+      throw new OndariError(first.error);
     }
     return first;
   }
@@ -61,7 +61,7 @@ export class Ambral {
 
       if (response.status === 429 || response.status >= 500) {
         if (attempt >= this.retries) {
-          throw new AmbralError(`HTTP ${response.status} after ${this.retries} retries`);
+          throw new OndariError(`HTTP ${response.status} after ${this.retries} retries`);
         }
         await this.backoff(attempt);
         continue;
@@ -71,11 +71,11 @@ export class Ambral {
       try {
         data = (await response.json()) as IngestResponse;
       } catch {
-        throw new AmbralError(`invalid JSON in ${response.status} response`);
+        throw new OndariError(`invalid JSON in ${response.status} response`);
       }
 
       if (!response.ok) {
-        throw new AmbralError(data.error ?? `HTTP ${response.status}`);
+        throw new OndariError(data.error ?? `HTTP ${response.status}`);
       }
 
       return data.results ?? [];

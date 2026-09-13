@@ -1,26 +1,26 @@
-# ambral-sdk (Python)
+# ondari-sdk (Python)
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/ambral-app/getambral/master/packages/sdk-python/logo.png" alt="Ambral" width="200"/>
+  <img src="https://raw.githubusercontent.com/ondari-app/getondari/master/packages/sdk-python/logo.png" alt="Ondari" width="200"/>
 </p>
 
-The Ambral Python SDK. Send usage events and read back itemized,
+The Ondari Python SDK. Send usage events and read back itemized,
 explainable costs. Python 3.8+, no third-party dependencies (stdlib only).
 
-Installs as the `ambral-sdk` distribution; imports as `ambral`.
+Installs as the `ondari-sdk` distribution; imports as `ondari`.
 
 ```bash
-pip install ambral-sdk
+pip install ondari-sdk
 ```
 
 ## Usage
 
 ```python
-from ambral import Ambral
+from ondari import Ondari
 
-ambral = Ambral(api_key="YOUR_KEY")
+ondari = Ondari(api_key="YOUR_KEY")
 
-result = ambral.track({
+result = ondari.track({
     "provider": "openai",
     "model": "gpt-4o",
     "inputTokens": 1_200_000,
@@ -34,7 +34,7 @@ result = ambral.track({
 Batch:
 
 ```python
-results = ambral.track_batch([
+results = ondari.track_batch([
     {"provider": "openai", "model": "gpt-4o", "inputTokens": 1000, "outputTokens": 200},
     {"provider": "anthropic", "model": "claude-sonnet-4", "inputTokens": 500, "outputTokens": 100},
 ])
@@ -46,11 +46,11 @@ Every event carries an `idempotency_key`. Omit it and the SDK generates one;
 pass your own to make retries safe:
 
 ```python
-from ambral import idempotency_key
+from ondari import idempotency_key
 
 key = idempotency_key()
-ambral.track({"provider": "openai", "model": "gpt-4o", "idempotencyKey": key})
-ambral.track({"provider": "openai", "model": "gpt-4o", "idempotencyKey": key})  # safe retry
+ondari.track({"provider": "openai", "model": "gpt-4o", "idempotencyKey": key})
+ondari.track({"provider": "openai", "model": "gpt-4o", "idempotencyKey": key})  # safe retry
 ```
 
 ## Configuration
@@ -58,7 +58,7 @@ ambral.track({"provider": "openai", "model": "gpt-4o", "idempotencyKey": key})  
 | Argument | Default | Notes |
 |---|---|---|
 | `api_key` | — | Required. Project API key from the dashboard. |
-| `base_url` | `https://ambral.dev` | Point at a self-hosted instance. |
+| `base_url` | `https://ondari.dev` | Point at a self-hosted instance. |
 | `retries` | `3` | Retries network errors and 429/5xx with backoff. |
 | `timeout` | `10.0` | Per-request timeout (seconds). |
 | `http` | `UrllibHttpClient` | Inject a transport for testing. |
@@ -67,7 +67,7 @@ ambral.track({"provider": "openai", "model": "gpt-4o", "idempotencyKey": key})  
 
 - Cost is **server-computed** — you never send a price.
 - Unknown models are accepted (`pricingStatus: "unpriced"`), never rejected.
-- Client errors raise `AmbralError`; rate limits and server errors retry.
+- Client errors raise `OndariError`; rate limits and server errors retry.
 - No prompts or completions are ever sent — only metadata and token counts.
 
 See the [event spec](../../docs/events.md) for the full field reference.

@@ -1,6 +1,6 @@
 {
-  "name": "ambral/sdk",
-  "description": "Ambral PHP SDK — send usage events and read back itemized, explainable costs.",
+  "name": "ondari/sdk",
+  "description": "Ondari PHP SDK — send usage events and read back itemized, explainable costs.",
   "type": "library",
   "license": "MIT",
   "require": {
@@ -10,7 +10,7 @@
   },
   "autoload": {
     "psr-4": {
-      "Ambral\\": "src/"
+      "Ondari\\": "src/"
     }
   }
 }

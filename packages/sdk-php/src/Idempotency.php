@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Ambral;
+namespace Ondari;
 
 final class Idempotency
 {

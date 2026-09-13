@@ -1,5 +1,5 @@
 /**
- * A usage event, matching the canonical Ambral event spec
+ * A usage event, matching the canonical Ondari event spec
  * (docs/events.md). Only `provider` is required — everything else is
  * optional and defaults server-side.
  */
@@ -39,9 +39,9 @@ export interface TrackResult {
   error?: string;
 }
 
-export interface AmbralOptions {
+export interface OndariOptions {
   apiKey: string;
-  /** Defaults to https://ambral.dev. Point at a self-hosted instance to use it there. */
+  /** Defaults to https://ondari.dev. Point at a self-hosted instance to use it there. */
   baseUrl?: string;
   /** Retry count for network errors and 429/5xx. Default 3. */
   retries?: number;

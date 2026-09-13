@@ -3,7 +3,7 @@
 import urllib.error
 import urllib.request
 
-from .errors import AmbralError
+from .errors import OndariError
 
 
 class HttpResponse:
@@ -14,7 +14,7 @@ class HttpResponse:
 
 class UrllibHttpClient:
     """Dependency-free HTTP client. Returns an HttpResponse for any HTTP
-    status (including 4xx/5xx); raises AmbralError only on network
+    status (including 4xx/5xx); raises OndariError only on network
     failures, which the client treats as retryable."""
 
     def __init__(self, timeout: float = 10.0):
@@ -30,6 +30,6 @@ class UrllibHttpClient:
         except urllib.error.HTTPError as e:
             return HttpResponse(e.code, e.read().decode("utf-8"))
         except urllib.error.URLError as e:
-            raise AmbralError(f"network error: {e.reason}") from e
+            raise OndariError(f"network error: {e.reason}") from e
         except TimeoutError as e:
-            raise AmbralError("request timed out") from e
+            raise OndariError("request timed out") from e

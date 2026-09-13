@@ -1,4 +1,4 @@
-// Ambral open-core schema.
+// Ondari open-core schema.
 //
 // This is the measurement + pricing + budgets half of the system. The
 // Cloud product adds tenant/auth/billing models (User, Organization,

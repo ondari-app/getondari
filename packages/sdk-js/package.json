@@ -1,7 +1,7 @@
 {
-  "name": "@ambral/sdk",
+  "name": "@ondari/sdk",
   "version": "0.1.0",
-  "description": "Ambral JavaScript/TypeScript SDK — send usage events and read back itemized, explainable costs.",
+  "description": "Ondari JavaScript/TypeScript SDK — send usage events and read back itemized, explainable costs.",
   "type": "module",
   "main": "./src/index.ts",
   "types": "./src/index.ts",

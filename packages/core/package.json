@@ -1,7 +1,7 @@
 {
-  "name": "@ambral/core",
+  "name": "@ondari/core",
   "version": "0.1.0",
-  "description": "Ambral open core: deterministic AI cost calculation, event validation, budgets, and usage aggregation.",
+  "description": "Ondari open core: deterministic AI cost calculation, event validation, budgets, and usage aggregation.",
   "type": "module",
   "main": "./src/index.ts",
   "types": "./src/index.ts",

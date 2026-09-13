@@ -1,8 +1,8 @@
 import json
 import unittest
 
-from ambral import Ambral, AmbralError, idempotency_key
-from ambral.http import HttpResponse
+from ondari import Ondari, OndariError, idempotency_key
+from ondari.http import HttpResponse
 
 
 class FakeHttpClient:
@@ -27,14 +27,14 @@ class TestTrack(unittest.TestCase):
         fake.responses.append(ok_json([
             {"accepted": True, "pricingStatus": "priced", "cost": 3.42, "explanation": "..."},
         ]))
-        ab = Ambral("k", http=fake)
+        ab = Ondari("k", http=fake)
         result = ab.track({"provider": "openai", "model": "gpt-4o", "inputTokens": 1200000, "outputTokens": 42000})
 
         self.assertEqual(result["cost"], 3.42)
         self.assertEqual(result["pricingStatus"], "priced")
 
         call = fake.calls[0]
-        self.assertEqual(call["url"], "https://ambral.dev/api/ingest")
+        self.assertEqual(call["url"], "https://ondari.dev/api/ingest")
         self.assertEqual(call["headers"]["Authorization"], "Bearer k")
         sent = json.loads(call["body"])
         self.assertEqual(len(sent), 1)
@@ -46,7 +46,7 @@ class TestTrack(unittest.TestCase):
     def test_uses_caller_idempotency_key(self):
         fake = FakeHttpClient()
         fake.responses.append(ok_json([{"accepted": True}]))
-        ab = Ambral("k", http=fake)
+        ab = Ondari("k", http=fake)
         ab.track({"provider": "x", "idempotencyKey": "op-1"})
         sent = json.loads(fake.calls[0]["body"])
         self.assertEqual(sent[0]["idempotency_key"], "op-1")
@@ -54,14 +54,14 @@ class TestTrack(unittest.TestCase):
     def test_honors_custom_base_url(self):
         fake = FakeHttpClient()
         fake.responses.append(ok_json([{"accepted": True}]))
-        ab = Ambral("k", base_url="https://selfhost.example/", http=fake)
+        ab = Ondari("k", base_url="https://selfhost.example/", http=fake)
         ab.track({"provider": "x"})
         self.assertEqual(fake.calls[0]["url"], "https://selfhost.example/api/ingest")
 
     def test_serializes_datetime_timestamp(self):
         fake = FakeHttpClient()
         fake.responses.append(ok_json([{"accepted": True}]))
-        ab = Ambral("k", http=fake)
+        ab = Ondari("k", http=fake)
         import datetime
         ab.track({"provider": "x", "timestamp": datetime.datetime(2026, 9, 9, 14, 0, 0)})
         sent = json.loads(fake.calls[0]["body"])
@@ -70,8 +70,8 @@ class TestTrack(unittest.TestCase):
     def test_throws_on_401_with_server_message(self):
         fake = FakeHttpClient()
         fake.responses.append(HttpResponse(401, json.dumps({"error": "Unauthorized"})))
-        ab = Ambral("bad", http=fake)
-        with self.assertRaises(AmbralError) as ctx:
+        ab = Ondari("bad", http=fake)
+        with self.assertRaises(OndariError) as ctx:
             ab.track({"provider": "x"})
         self.assertIn("Unauthorized", str(ctx.exception))
 
@@ -79,14 +79,14 @@ class TestTrack(unittest.TestCase):
         fake = FakeHttpClient()
         fake.responses.append(HttpResponse(429, json.dumps({"error": "Rate limit exceeded"})))
         fake.responses.append(ok_json([{"accepted": True}]))
-        ab = Ambral("k", retries=2, http=fake)
+        ab = Ondari("k", retries=2, http=fake)
         result = ab.track({"provider": "x"})
         self.assertTrue(result["accepted"])
         self.assertEqual(len(fake.calls), 2)
 
     def test_requires_api_key(self):
-        with self.assertRaises(AmbralError):
-            Ambral("")
+        with self.assertRaises(OndariError):
+            Ondari("")
 
 
 class TestTrackBatch(unittest.TestCase):
@@ -96,7 +96,7 @@ class TestTrackBatch(unittest.TestCase):
             {"accepted": True, "eventId": "a"},
             {"accepted": True, "eventId": "b"},
         ]))
-        ab = Ambral("k", http=fake)
+        ab = Ondari("k", http=fake)
         results = ab.track_batch([
             {"provider": "openai", "model": "gpt-4o"},
             {"provider": "anthropic", "model": "claude-sonnet-4"},
@@ -107,7 +107,7 @@ class TestTrackBatch(unittest.TestCase):
 
     def test_empty_batch_makes_no_request(self):
         fake = FakeHttpClient()
-        ab = Ambral("k", http=fake)
+        ab = Ondari("k", http=fake)
         self.assertEqual(ab.track_batch([]), [])
         self.assertEqual(len(fake.calls), 0)
 

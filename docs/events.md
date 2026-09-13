@@ -1,6 +1,6 @@
 # Canonical Usage Event
 
-Every AI action Ambral records is one **usage event**. This document is
+Every AI action Ondari records is one **usage event**. This document is
 the source of truth for that shape — the SDKs and the ingestion API accept
 exactly this.
 
@@ -50,7 +50,7 @@ exactly this.
 
 ## Cost is server-computed
 
-You do **not** send a cost. Ambral resolves the pricing version in effect
+You do **not** send a cost. Ondari resolves the pricing version in effect
 for `provider` + `model` at `timestamp`, computes the itemized cost, and
 returns it with its provenance.
 
@@ -69,5 +69,5 @@ zero-cost, and it is backfilled automatically once pricing is verified.
 
 ## Privacy
 
-Ambral records **metadata, not prompts or completions**. Prompt/completion
+Ondari records **metadata, not prompts or completions**. Prompt/completion
 capture is off by default and opt-in. `customMetadata` is yours to control.

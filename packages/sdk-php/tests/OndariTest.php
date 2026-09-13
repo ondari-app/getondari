@@ -5,20 +5,20 @@ declare(strict_types=1);
 /*
  * Self-contained test runner (no external test framework).
  *
- * Run:  php tests/AmbralTest.php
+ * Run:  php tests/OndariTest.php
  * Exits non-zero on the first failure.
  */
 
-require __DIR__ . '/../src/AmbralException.php';
+require __DIR__ . '/../src/OndariException.php';
 require __DIR__ . '/../src/HttpClient.php';
 require __DIR__ . '/../src/Idempotency.php';
-require __DIR__ . '/../src/Ambral.php';
+require __DIR__ . '/../src/Ondari.php';
 
-use Ambral\Ambral;
-use Ambral\AmbralException;
-use Ambral\HttpClient;
-use Ambral\HttpResponse;
-use Ambral\Idempotency;
+use Ondari\Ondari;
+use Ondari\OndariException;
+use Ondari\HttpClient;
+use Ondari\HttpResponse;
+use Ondari\Idempotency;
 
 final class FakeHttpClient implements HttpClient
 {
@@ -61,14 +61,14 @@ function okJson(array $results): HttpResponse
 
 // 1. track posts one event and returns the result
 $fake = new FakeHttpClient();
-$ab = new Ambral('k', 'https://ambral.dev', 3, $fake);
+$ab = new Ondari('k', 'https://ondari.dev', 3, $fake);
 $fake->responses[] = okJson([
     ['accepted' => true, 'pricingStatus' => 'priced', 'cost' => 3.42, 'explanation' => '…'],
 ]);
 $result = $ab->track(['provider' => 'openai', 'model' => 'gpt-4o', 'inputTokens' => 1200000, 'outputTokens' => 42000]);
 same(3.42, $result['cost'], 'track returns cost');
 same('priced', $result['pricingStatus'], 'track returns pricingStatus');
-same('https://ambral.dev/api/ingest', $fake->calls[0]['url'], 'posts to /api/ingest');
+same('https://ondari.dev/api/ingest', $fake->calls[0]['url'], 'posts to /api/ingest');
 same('Bearer k', $fake->calls[0]['headers']['Authorization'], 'sends bearer auth');
 $sent = json_decode($fake->calls[0]['body'], true);
 same('openai', $sent[0]['provider'], 'serializes provider');
@@ -78,7 +78,7 @@ check('generates idempotency_key', isset($sent[0]['idempotency_key']) && $sent[0
 
 // 2. caller-supplied idempotency key
 $fake = new FakeHttpClient();
-$ab = new Ambral('k', 'https://ambral.dev', 3, $fake);
+$ab = new Ondari('k', 'https://ondari.dev', 3, $fake);
 $fake->responses[] = okJson([['accepted' => true]]);
 $ab->track(['provider' => 'x', 'idempotencyKey' => 'op-1']);
 $sent = json_decode($fake->calls[0]['body'], true);
@@ -86,25 +86,25 @@ same('op-1', $sent[0]['idempotency_key'], 'uses caller idempotency key');
 
 // 3. custom baseUrl
 $fake = new FakeHttpClient();
-$ab = new Ambral('k', 'https://selfhost.example/', 3, $fake);
+$ab = new Ondari('k', 'https://selfhost.example/', 3, $fake);
 $fake->responses[] = okJson([['accepted' => true]]);
 $ab->track(['provider' => 'x']);
 same('https://selfhost.example/api/ingest', $fake->calls[0]['url'], 'honors custom baseUrl');
 
 // 4. throws on 401 with server message
 $fake = new FakeHttpClient();
-$ab = new Ambral('bad', 'https://ambral.dev', 3, $fake);
+$ab = new Ondari('bad', 'https://ondari.dev', 3, $fake);
 $fake->responses[] = new HttpResponse(401, json_encode(['error' => 'Unauthorized'], JSON_THROW_ON_ERROR));
 try {
     $ab->track(['provider' => 'x']);
-    check('throws AmbralException on 401', false);
-} catch (AmbralException $e) {
-    same('Unauthorized', $e->getMessage(), 'throws AmbralException with server message');
+    check('throws OndariException on 401', false);
+} catch (OndariException $e) {
+    same('Unauthorized', $e->getMessage(), 'throws OndariException with server message');
 }
 
 // 5. retries on 429 then succeeds
 $fake = new FakeHttpClient();
-$ab = new Ambral('k', 'https://ambral.dev', 2, $fake);
+$ab = new Ondari('k', 'https://ondari.dev', 2, $fake);
 $fake->responses[] = new HttpResponse(429, json_encode(['error' => 'Rate limit exceeded'], JSON_THROW_ON_ERROR));
 $fake->responses[] = okJson([['accepted' => true]]);
 $result = $ab->track(['provider' => 'x']);
@@ -113,7 +113,7 @@ same(2, count($fake->calls), 'retries then succeeds');
 
 // 6. batch preserves order
 $fake = new FakeHttpClient();
-$ab = new Ambral('k', 'https://ambral.dev', 3, $fake);
+$ab = new Ondari('k', 'https://ondari.dev', 3, $fake);
 $fake->responses[] = okJson([
     ['accepted' => true, 'eventId' => 'a'],
     ['accepted' => true, 'eventId' => 'b'],
@@ -128,16 +128,16 @@ same(2, count($sent), 'batch sends both events');
 
 // 7. empty batch makes no request
 $fake = new FakeHttpClient();
-$ab = new Ambral('k', 'https://ambral.dev', 3, $fake);
+$ab = new Ondari('k', 'https://ondari.dev', 3, $fake);
 $results = $ab->trackBatch([]);
 same([], $results, 'empty batch returns []');
 same(0, count($fake->calls), 'empty batch does not call API');
 
 // 8. apiKey required
 try {
-    new Ambral('');
+    new Ondari('');
     check('requires apiKey', false);
-} catch (AmbralException $e) {
+} catch (OndariException $e) {
     check('requires apiKey', true);
 }
 
